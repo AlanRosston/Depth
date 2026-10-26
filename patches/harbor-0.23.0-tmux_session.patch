@@ -1,0 +1,68 @@
+--- a/harbor/agents/terminus_2/tmux_session.py
++++ b/harbor/agents/terminus_2/tmux_session.py
+@@ -645,10 +645,17 @@
+             f"stderr={result.stderr!r}, stdout={result.stdout!r}"
+         )
+ 
+-    def _is_command_too_long_error(self, result: ExecResult) -> bool:
+-        return result.return_code != 0 and self._TMUX_COMMAND_TOO_LONG_MARKER in (
+-            result.stderr or ""
+-        )
++    # [DEPTH patch] A failed send counts as too long if the marker is on stderr or stdout, or if the command is
++    # longer than _DEPTH_LONG_COMMAND_BYTES and the send produced no output.
++    _DEPTH_LONG_COMMAND_BYTES = 1024
++
++    def _is_command_too_long_error(self, result: ExecResult, command: str = "") -> bool:
++        if result.return_code == 0:
++            return False
++        out = (result.stderr or "") + (result.stdout or "")
++        if self._TMUX_COMMAND_TOO_LONG_MARKER in out:
++            return True
++        return not out.strip() and self._utf8_len(command) > self._DEPTH_LONG_COMMAND_BYTES
+ 
+     async def _paste_key(self, key: str, action: str) -> None:
+         """Deliver *key* to the pane via a tmux paste buffer.
+@@ -682,11 +689,20 @@
+                 redirect = ">>" if offset else ">"
+                 await _run(f"printf %s {chunk} | base64 -d {redirect} {quoted_path}")
+ 
+-            await _run(
+-                f"tmux load-buffer -b {buffer_name} {quoted_path} && "
+-                f"tmux paste-buffer -d -b {buffer_name} "
+-                f"-t {shlex.quote(self._session_name)}"
+-            )
++            try:
++                await _run(
++                    f"tmux load-buffer -b {buffer_name} {quoted_path} && "
++                    f"tmux paste-buffer -d -b {buffer_name} "
++                    f"-t {shlex.quote(self._session_name)}"
++                )
++            except RuntimeError as e:
++                # [DEPTH patch] Use the unnamed buffer when tmux rejects named buffers ("buffer invalid").
++                if "buffer invalid" not in str(e):
++                    raise
++                await _run(
++                    f"tmux load-buffer {quoted_path} && "
++                    f"tmux paste-buffer -d -t {shlex.quote(self._session_name)}"
++                )
+         finally:
+             await self.environment.exec(command=f"rm -f {quoted_path}", user=self._user)
+ 
+@@ -695,7 +711,7 @@
+         result = await self.environment.exec(command=command, user=self._user)
+         if result.return_code == 0:
+             return
+-        if self._is_command_too_long_error(result):
++        if self._is_command_too_long_error(result, command):
+             # A key too long for a send-keys command cannot be a special key
+             # name (those are all short), so pasting it literally is safe.
+             await self._paste_key(key, action)
+@@ -708,7 +724,7 @@
+             result = await self.environment.exec(command=command, user=self._user)
+             if result.return_code == 0:
+                 continue
+-            if self._is_command_too_long_error(result):
++            if self._is_command_too_long_error(result, command):
+                 # This tmux build enforces a smaller command-size limit than
+                 # the assumed ~16 KB; resend the keys one at a time, pasting
+                 # any that this tmux still rejects.
