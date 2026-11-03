@@ -1,17 +1,4 @@
-# DEPTH
-
 [![arXiv](https://img.shields.io/badge/arXiv-2611.01927-b31b1b.svg)](https://arxiv.org/abs/2611.01927)
-
-Code for [*Is Your Long-Horizon Benchmark Really Deep? Measuring and Synthesizing Depth in Terminal Tasks*](https://arxiv.org/abs/2611.01927).
-
-Yu Jiang, Yue Huang, Hang Hua, Yuyang Wu, Zixuan Weng, Olexandr Isayev, Yue Zhao, Zinan Lin, and Xiangliang Zhang.
-
-[Paper](https://arxiv.org/abs/2611.01927) · [PDF](https://arxiv.org/pdf/2611.01927)
-
-The **depth** $D$ of a terminal task is the smallest cap on the number of turns under which a model still solves it,
-where one turn is one reply of the model, the commands in it, and the output it sees. This repository contains the
-code for **measuring $D$** on existing tasks (Harbor tasks with one instruction) and on multi-segment tasks, under an
-ordered model set. The pipeline that generates multi-segment tasks is not included in this release.
 
 ## Requirements
 
