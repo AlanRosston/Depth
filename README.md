@@ -1,6 +1,12 @@
 # DEPTH
 
-Code for *Is Your Long-Horizon Benchmark Really Deep? Measuring and Synthesizing Depth in Terminal Tasks*.
+[![arXiv](https://img.shields.io/badge/arXiv-2611.01927-b31b1b.svg)](https://arxiv.org/abs/2611.01927)
+
+Code for [*Is Your Long-Horizon Benchmark Really Deep? Measuring and Synthesizing Depth in Terminal Tasks*](https://arxiv.org/abs/2611.01927).
+
+Yu Jiang, Yue Huang, Hang Hua, Yuyang Wu, Zixuan Weng, Olexandr Isayev, Yue Zhao, Zinan Lin, and Xiangliang Zhang.
+
+[Paper](https://arxiv.org/abs/2611.01927) · [PDF](https://arxiv.org/pdf/2611.01927)
 
 The **depth** $D$ of a terminal task is the smallest cap on the number of turns under which a model still solves it,
 where one turn is one reply of the model, the commands in it, and the output it sees. This repository contains the
@@ -85,6 +91,22 @@ python3 scripts/harness.py report --model M            # its pass rate
 ```bash
 python3 tests/audit_selftest.py                                          # seconds, no docker
 SELFTEST_TOY_IMAGE=<image with bash, python3, tmux and /app> python3 tests/harness_selftest.py
+```
+
+## Citation
+
+If you use this code in your research, please cite:
+
+```bibtex
+@misc{jiang2026depth,
+  title         = {Is Your Long-Horizon Benchmark Really Deep? Measuring and Synthesizing Depth in Terminal Tasks},
+  author        = {Yu Jiang and Yue Huang and Hang Hua and Yuyang Wu and Zixuan Weng and Olexandr Isayev and Yue Zhao and Zinan Lin and Xiangliang Zhang},
+  year          = {2026},
+  eprint        = {2611.01927},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.AI},
+  url           = {https://arxiv.org/abs/2611.01927},
+}
 ```
 
 ## License
